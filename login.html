@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DebtControl — Kirish</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0f14;--surface:#13161e;--border:#252a38;--accent:#e8373f;--green:#22c55e;--text:#e8eaf0;--text2:#8892a4;--text3:#4a5568;--font-head:'Unbounded',sans-serif;--font-body:'Golos Text',sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh;display:flex;align-items:center;justify-content:center;}
+.login-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px;width:400px;max-width:95vw;}
+.logo{text-align:center;margin-bottom:32px;}
+.logo-icon{font-size:40px;margin-bottom:8px;}
+.logo-text{font-family:var(--font-head);font-size:18px;font-weight:700;color:var(--accent);}
+.logo-sub{font-size:12px;color:var(--text2);margin-top:4px;}
+.lang-row{display:flex;gap:8px;margin-bottom:24px;}
+.lang-btn{flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;}
+.lang-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.form-group{margin-bottom:16px;}
+label{display:block;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+.input{width:100%;background:#0d0f14;border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-family:var(--font-body);font-size:14px;outline:none;transition:border-color .15s;}
+.input:focus{border-color:var(--accent);}
+.input::placeholder{color:var(--text3);}
+.btn-login{width:100%;padding:13px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-family:var(--font-head);font-size:13px;font-weight:700;cursor:pointer;margin-top:8px;transition:background .15s;}
+.btn-login:hover{background:#c9272e;}
+.error-msg{color:#ef4444;font-size:13px;text-align:center;margin-top:12px;display:none;}
+.footer-note{text-align:center;font-size:11px;color:var(--text3);margin-top:20px;}
+</style>
+</head>
+<body>
+<div class="login-box">
+  <div class="logo">
+    <div class="logo-icon">⚡</div>
+    <div class="logo-text">DebtControl</div>
+    <div class="logo-sub" id="logo-sub">Qarz undiruv tizimi</div>
+  </div>
+
+  <div class="lang-row">
+    <button class="lang-btn active" onclick="setLang('uz')" id="btn-uz">🇺🇿 O'zbek</button>
+    <button class="lang-btn" onclick="setLang('ru')" id="btn-ru">🇷🇺 Русский</button>
+  </div>
+
+  <div class="form-group">
+    <label id="lbl-login">Login</label>
+    <input class="input" id="username" placeholder="admin" autocomplete="username">
+  </div>
+  <div class="form-group">
+    <label id="lbl-pass">Parol</label>
+    <input class="input" id="password" type="password" placeholder="••••••••" autocomplete="current-password">
+  </div>
+  <button class="btn-login" onclick="doLogin()" id="btn-enter">Kirish</button>
+  <div class="error-msg" id="error-msg">Noto'g'ri login yoki parol</div>
+  <div class="footer-note" id="footer-note">v2.0 • Lokal tizim</div>
+</div>
+
+<script>
+const T = {
+  uz: { sub:'Qarz undiruv tizimi', login:'Login', pass:'Parol', enter:'Kirish', error:"Noto'g'ri login yoki parol", footer:'v2.0 • Lokal tizim' },
+  ru: { sub:'Система взыскания', login:'Логин', pass:'Пароль', enter:'Войти', error:'Неверный логин или пароль', footer:'v2.0 • Локальная система' }
+};
+let lang = localStorage.getItem('lang')||'uz';
+function setLang(l) {
+  lang=l; localStorage.setItem('lang',l);
+  document.getElementById('btn-uz').classList.toggle('active',l==='uz');
+  document.getElementById('btn-ru').classList.toggle('active',l==='ru');
+  const t=T[l];
+  document.getElementById('logo-sub').textContent=t.sub;
+  document.getElementById('lbl-login').textContent=t.login;
+  document.getElementById('lbl-pass').textContent=t.pass;
+  document.getElementById('btn-enter').textContent=t.enter;
+  document.getElementById('footer-note').textContent=t.footer;
+}
+setLang(lang);
+
+async function doLogin() {
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+  if (!username||!password) return;
+  const r = await fetch('/login', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({username, password})});
+  const data = await r.json();
+  if (data.success) { window.location.href='/'; }
+  else {
+    const err = document.getElementById('error-msg');
+    err.textContent = T[lang].error; err.style.display='block';
+  }
+}
+document.getElementById('password').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('username').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('password').focus(); });
+</script>
+</body>
+</html>

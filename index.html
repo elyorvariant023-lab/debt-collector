@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DebtControl</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0f14;--surface:#13161e;--surface2:#1a1e2a;--border:#252a38;--accent:#e8373f;--green:#22c55e;--yellow:#f59e0b;--blue:#3b82f6;--orange:#f97316;--purple:#a855f7;--text:#e8eaf0;--text2:#8892a4;--text3:#4a5568;--radius:12px;--font-head:'Unbounded',sans-serif;--font-body:'Golos Text',sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh;}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;}
+.logo{padding:18px 16px 12px;border-bottom:1px solid var(--border);}
+.logo-text{font-family:var(--font-head);font-size:13px;font-weight:700;color:var(--accent);}
+.logo-sub{font-size:10px;color:var(--text2);margin-top:2px;}
+.lang-switcher{display:flex;gap:4px;padding:8px 12px;border-bottom:1px solid var(--border);}
+.lang-btn{flex:1;padding:5px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:var(--font-body);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;}
+.lang-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+nav{padding:10px 8px;flex:1;overflow-y:auto;}
+.nav-section{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;padding:8px 12px 4px;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);transition:all .15s;margin-bottom:2px;user-select:none;position:relative;}
+.nav-item:hover{background:var(--surface2);color:var(--text);}
+.nav-item.active{background:rgba(232,55,63,.15);color:var(--accent);}
+.nav-badge{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px;min-width:18px;text-align:center;}
+.user-card{padding:12px 14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.user-avatar{width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;}
+.user-name{font-size:12px;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.user-role{font-size:10px;color:var(--text2);}
+.btn-logout{background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:4px;border-radius:4px;}
+.btn-logout:hover{color:var(--accent);}
+.main{margin-left:240px;min-height:100vh;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:13px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.page-title{font-family:var(--font-head);font-size:14px;font-weight:600;}
+.content{padding:20px 24px;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 15px;border-radius:8px;border:none;cursor:pointer;font-family:var(--font-body);font-size:13px;font-weight:600;transition:all .15s;}
+.btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#c9272e;}
+.btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+.btn-green{background:var(--green);color:#fff;}.btn-green:hover{background:#16a34a;}
+.btn-orange{background:var(--orange);color:#fff;}.btn-orange:hover{background:#ea6c10;}
+.btn-purple{background:var(--purple);color:#fff;}.btn-purple:hover{background:#9333ea;}
+.btn-danger{background:transparent;color:#ef4444;border:1px solid #ef444430;}.btn-danger:hover{background:#ef444415;}
+.btn-sm{padding:6px 11px;font-size:12px;border-radius:6px;}
+.btn-xs{padding:4px 8px;font-size:11px;border-radius:5px;}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;position:relative;overflow:hidden;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.stat-card.red::before{background:var(--accent);}
+.stat-card.green::before{background:var(--green);}
+.stat-card.yellow::before{background:var(--yellow);}
+.stat-card.orange::before{background:var(--orange);}
+.stat-card.purple::before{background:var(--purple);}
+.stat-label{font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.7px;}
+.stat-value{font-family:var(--font-head);font-size:24px;font-weight:700;margin-top:5px;}
+.stat-sub{font-size:11px;color:var(--text2);margin-top:3px;}
+.section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;}
+.section-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.section-title{font-family:var(--font-head);font-size:11px;font-weight:600;}
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+th{padding:9px 12px;text-align:left;font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;white-space:nowrap;border-bottom:1px solid var(--border);}
+td{padding:10px 12px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:rgba(255,255,255,.02);}
+.debtor-name{font-weight:600;}
+.debtor-phone{color:var(--text2);font-size:11px;margin-top:1px;}
+.contract{font-family:monospace;font-size:12px;color:var(--text2);}
+.amount{font-weight:700;font-size:13px;}
+.amount-paid{font-size:11px;color:var(--green);}
+.progress-bar{height:3px;border-radius:2px;background:var(--surface2);overflow:hidden;margin-top:3px;width:90px;}
+.progress-fill{height:100%;border-radius:2px;background:var(--accent);}
+.progress-fill.full{background:var(--green);}
+.last-note{font-size:11px;color:var(--text2);max-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.actions{display:flex;gap:4px;flex-wrap:wrap;}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600;}
+.badge-paid{background:rgba(34,197,94,.15);color:var(--green);}
+.badge-unpaid{background:rgba(232,55,63,.15);color:var(--accent);}
+.badge-partial{background:rgba(245,158,11,.15);color:var(--yellow);}
+.badge-admin{background:rgba(232,55,63,.15);color:var(--accent);}
+.badge-employee{background:rgba(59,130,246,.15);color:var(--blue);}
+.filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.search-input{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text);font-family:var(--font-body);font-size:13px;width:190px;outline:none;transition:border-color .15s;}
+.search-input:focus{border-color:var(--accent);}
+.search-input::placeholder{color:var(--text3);}
+.filter-select{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-family:var(--font-body);font-size:13px;outline:none;}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center;}
+.overlay.active{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:580px;max-width:96vw;max-height:92vh;overflow-y:auto;animation:modalIn .2s ease;}
+.modal-wide{width:720px;}
+@keyframes modalIn{from{opacity:0;transform:scale(.95) translateY(8px);}to{opacity:1;transform:scale(1) translateY(0);}}
+.modal-header{padding:15px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:1;}
+.modal-title{font-family:var(--font-head);font-size:13px;font-weight:600;}
+.modal-close{background:none;border:none;color:var(--text2);cursor:pointer;font-size:18px;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;}
+.modal-close:hover{background:var(--surface2);}
+.modal-body{padding:20px;}
+.modal-footer{padding:13px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-group.full{grid-column:1/-1;}
+label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;}
+.input{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:var(--font-body);font-size:13px;outline:none;transition:border-color .15s;}
+.input:focus{border-color:var(--accent);}
+.input::placeholder{color:var(--text3);}
+textarea.input{resize:vertical;min-height:80px;}
+.log-item{padding:12px 16px;border-bottom:1px solid var(--border);}
+.log-item:last-child{border-bottom:none;}
+.log-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;}
+.log-note{font-size:13px;line-height:1.5;}
+.log-ptp{display:inline-flex;align-items:center;gap:5px;margin-top:5px;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.25);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--orange);font-weight:600;}
+.log-ptp.done{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.25);color:var(--green);}
+.tpl-item{padding:13px 16px;border-bottom:1px solid var(--border);display:flex;gap:12px;}
+.tpl-item:last-child{border-bottom:none;}
+.tpl-body{flex:1;}
+.tpl-name{font-weight:600;font-size:13px;margin-bottom:3px;}
+.tpl-text{font-size:12px;color:var(--text2);line-height:1.5;}
+.tag{display:inline-block;background:rgba(59,130,246,.15);color:var(--blue);font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;font-family:monospace;}
+.detail-tab{flex:1;padding:11px;background:none;border:none;color:var(--text2);font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;}
+.detail-tab:hover{color:var(--text);}
+.detail-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.page{display:none;}.page.active{display:block;}
+.toast-container{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:7px;z-index:1000;}
+.toast{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 15px;font-size:13px;animation:toastIn .25s ease;min-width:210px;display:flex;align-items:center;gap:8px;}
+@keyframes toastIn{from{opacity:0;transform:translateX(16px);}to{opacity:1;transform:translateX(0);}}
+.toast.success{border-color:rgba(34,197,94,.3);}
+.toast.error{border-color:rgba(239,68,68,.3);}
+.empty{text-align:center;padding:44px 20px;color:var(--text2);}
+.empty-icon{font-size:38px;margin-bottom:10px;}
+.empty-text{font-size:13px;}
+.activity-item{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.activity-item:last-child{border-bottom:none;}
+.activity-icon{width:32px;height:32px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.activity-body{flex:1;}
+.activity-who{font-weight:600;font-size:13px;}
+.activity-what{font-size:12px;color:var(--text2);}
+.activity-time{font-size:11px;color:var(--text3);white-space:nowrap;}
+.user-stat-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);}
+.user-stat-row:last-child{border-bottom:none;}
+.user-stat-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--orange));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
+.user-stat-info{flex:1;}
+.user-stat-name{font-weight:600;font-size:13px;}
+.user-stat-username{font-size:11px;color:var(--text2);}
+.user-stat-numbers{display:flex;gap:16px;}
+.user-stat-num{text-align:center;}
+.user-stat-num-val{font-family:var(--font-head);font-size:16px;font-weight:700;}
+.user-stat-num-lbl{font-size:10px;color:var(--text2);}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-text">⚡ DebtControl</div>
+    <div class="logo-sub" data-t="logo_sub">Qarz undiruv tizimi</div>
+  </div>
+  <div class="lang-switcher">
+    <button class="lang-btn active" onclick="setLang('uz')" id="btn-uz">🇺🇿 O'zbek</button>
+    <button class="lang-btn" onclick="setLang('ru')" id="btn-ru">🇷🇺 Русский</button>
+  </div>
+  <nav>
+    <div class="nav-item active" data-page="dashboard"><span>📊</span><span data-t="nav_dashboard">Dashboard</span></div>
+    <div class="nav-item" data-page="ptp"><span>🔴</span><span data-t="nav_ptp">PTP — Bugun</span><span class="nav-badge" id="ptp-badge" style="display:none">0</span></div>
+    <div class="nav-item" data-page="debtors"><span>👥</span><span data-t="nav_debtors">Qarzdorlar</span></div>
+    <div class="nav-item" data-page="messages"><span>💬</span><span data-t="nav_messages">SMS tarixi</span></div>
+    <div class="nav-item" data-page="templates"><span>📝</span><span data-t="nav_templates">Shablonlar</span></div>
+    <div class="nav-section admin-only" data-t="nav_section_admin">ADMIN</div>
+    <div class="nav-item admin-only" data-page="users"><span>👤</span><span data-t="nav_users">Foydalanuvchilar</span></div>
+    <div class="nav-item admin-only" data-page="activity"><span>📋</span><span data-t="nav_activity">Faoliyat tarixi</span></div>
+  </nav>
+  <div class="user-card">
+    <div class="user-avatar" id="sidebar-avatar">A</div>
+    <div style="flex:1;min-width:0;">
+      <div class="user-name" id="sidebar-name">—</div>
+      <div class="user-role" id="sidebar-role">—</div>
+    </div>
+    <button class="btn-logout" onclick="doLogout()" title="Chiqish">🚪</button>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="page-title" id="topbarTitle">Dashboard</div>
+    <button class="btn btn-primary" onclick="openAddModal()" data-t="btn_add_debtor">+ Qarzdor qo'shish</button>
+  </div>
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card red"><div class="stat-label" data-t="stat_total">Jami qarzdorlar</div><div class="stat-value" id="s-total">—</div><div class="stat-sub" data-t="stat_total_sub">Bazada</div></div>
+        <div class="stat-card orange"><div class="stat-label" data-t="stat_ptp">PTP bugun</div><div class="stat-value" id="s-ptp">—</div><div class="stat-sub" data-t="stat_ptp_sub">Qayta aloqa kerak</div></div>
+        <div class="stat-card yellow"><div class="stat-label" data-t="stat_unpaid">To'lanmagan</div><div class="stat-value" id="s-unpaid">—</div><div class="stat-sub" data-t="stat_unpaid_sub">Diqqat talab qiladi</div></div>
+        <div class="stat-card green"><div class="stat-label" data-t="stat_paid">To'langan</div><div class="stat-value" id="s-paid">—</div><div class="stat-sub" data-t="stat_paid_sub">Yopilgan</div></div>
+      </div>
+      <div class="section" style="margin-bottom:16px;">
+        <div class="section-header"><div class="section-title" data-t="total_debt_title">Umumiy qarzlar</div></div>
+        <div style="padding:14px 18px;display:flex;gap:36px;flex-wrap:wrap;">
+          <div><div style="font-size:10px;color:var(--text2);margin-bottom:3px;text-transform:uppercase" data-t="total_debt">Jami qarz</div><div class="amount" id="s-total-debt" style="font-size:19px;">—</div></div>
+          <div><div style="font-size:10px;color:var(--green);margin-bottom:3px;text-transform:uppercase" data-t="total_paid_lbl">To'langan</div><div class="amount" id="s-total-paid" style="font-size:19px;color:var(--green);">—</div></div>
+          <div><div style="font-size:10px;color:var(--accent);margin-bottom:3px;text-transform:uppercase" data-t="remaining">Qoldiq</div><div class="amount" id="s-remaining" style="font-size:19px;color:var(--accent);">—</div></div>
+        </div>
+      </div>
+      <!-- User stats (admin only) -->
+      <div class="section admin-only" id="user-stats-section" style="margin-bottom:16px;">
+        <div class="section-header"><div class="section-title" data-t="user_performance">Xodimlar natijalari</div></div>
+        <div id="user-stats-list"></div>
+      </div>
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title" data-t="recent_records">So'nggi yozuvlar</div>
+          <button class="btn btn-ghost btn-sm" onclick="showPage('debtors')" data-t="all_btn">Barchasi →</button>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr>
+            <th data-t="th_debtor">Qarzdor</th><th data-t="th_contract">Shartnoma</th>
+            <th data-t="th_debt">Qarz</th><th data-t="th_status">Holat</th>
+            <th data-t="th_added_by">Kim qo'shdi</th><th>PTP</th><th data-t="th_actions">Amallar</th>
+          </tr></thead><tbody id="dash-tbody"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PTP PAGE -->
+    <div class="page" id="page-ptp">
+      <div id="ptp-empty" class="section" style="display:none"><div class="empty"><div class="empty-icon">🎉</div><div class="empty-text" data-t="ptp_empty">Bugun PTP yo'q!</div></div></div>
+      <div id="ptp-list"></div>
+    </div>
+
+    <!-- DEBTORS -->
+    <div class="page" id="page-debtors">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title" data-t="all_debtors">Barcha qarzdorlar</div>
+          <div class="filters">
+            <input class="search-input" id="searchInput" data-t-placeholder="search_placeholder" placeholder="🔍 Qidirish..." oninput="loadDebtors()">
+            <select class="filter-select" id="statusFilter" onchange="loadDebtors()">
+              <option value="" data-t="filter_all">Barcha holatlar</option>
+              <option value="unpaid" data-t="filter_unpaid">To'lanmagan</option>
+              <option value="partial" data-t="filter_partial">Qisman</option>
+              <option value="paid" data-t="filter_paid">To'langan</option>
+            </select>
+            <select class="filter-select admin-only" id="userFilter" onchange="loadDebtors()">
+              <option value="" data-t="filter_all_users">Barcha xodimlar</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr>
+            <th data-t="th_debtor">Qarzdor</th><th data-t="th_contract">Shartnoma</th>
+            <th data-t="th_debt">Qarz</th><th data-t="th_status">Holat</th>
+            <th data-t="th_added_by">Kim qo'shdi</th><th data-t="th_last_contact">Oxirgi muloqot</th>
+            <th data-t="th_next_ptp">PTP</th><th data-t="th_actions">Amallar</th>
+          </tr></thead><tbody id="debtors-tbody"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- MESSAGES -->
+    <div class="page" id="page-messages">
+      <div class="section">
+        <div class="section-header"><div class="section-title" data-t="sms_history">SMS tarixi</div></div>
+        <div id="messages-list"></div>
+      </div>
+    </div>
+
+    <!-- TEMPLATES -->
+    <div class="page" id="page-templates">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title" data-t="sms_templates">SMS shablonlar</div>
+          <button class="btn btn-primary btn-sm" onclick="openTemplateModal()" data-t="new_template">+ Yangi shablon</button>
+        </div>
+        <div style="padding:10px 16px;background:rgba(59,130,246,.07);border-bottom:1px solid var(--border);">
+          <div style="font-size:11px;color:var(--text2);margin-bottom:5px;" data-t="variables_label">O'zgaruvchilar:</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;">
+            <span class="tag">{full_name}</span><span class="tag">{contract_number}</span><span class="tag">{debt_amount}</span><span class="tag">{paid_amount}</span><span class="tag">{due_date}</span><span class="tag">{phone}</span>
+          </div>
+        </div>
+        <div id="templates-list"></div>
+      </div>
+    </div>
+
+    <!-- USERS (admin) -->
+    <div class="page admin-only" id="page-users">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title" data-t="all_users">Foydalanuvchilar</div>
+          <button class="btn btn-primary btn-sm" onclick="openUserModal()" data-t="add_user">+ Qo'shish</button>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr>
+            <th data-t="th_user">Foydalanuvchi</th><th>Login</th>
+            <th data-t="th_role">Rol</th><th data-t="th_debtors_added">Qo'shilgan qarzdorlar</th>
+            <th data-t="th_status">Holat</th><th data-t="th_actions">Amallar</th>
+          </tr></thead><tbody id="users-tbody"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVITY -->
+    <div class="page admin-only" id="page-activity">
+      <div class="section">
+        <div class="section-header"><div class="section-title" data-t="activity_title">Faoliyat tarixi</div></div>
+        <div id="activity-list"></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- DEBTOR MODAL -->
+<div class="overlay" id="debtorModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title" id="modalTitle"></div><button class="modal-close" onclick="closeModal('debtorModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full"><label data-t="label_fullname">F.I.O *</label><input class="input" id="f_name" data-t-placeholder="ph_fullname"></div>
+        <div class="form-group"><label data-t="label_phone">Telefon *</label><input class="input" id="f_phone" placeholder="+998901234567"></div>
+        <div class="form-group"><label data-t="label_contract">Shartnoma *</label><input class="input" id="f_contract" placeholder="VRF-00813334"></div>
+        <div class="form-group"><label data-t="label_debt">Qarz (so'm) *</label><input class="input" id="f_debt" type="number" placeholder="1170155.75"></div>
+        <div class="form-group"><label data-t="label_paid">To'langan (so'm)</label><input class="input" id="f_paid" type="number" placeholder="0" value="0"></div>
+        <div class="form-group"><label data-t="label_due">To'lov sanasi</label><input class="input" id="f_due" type="date"></div>
+        <div class="form-group full"><label data-t="label_comment">Izoh</label><textarea class="input" id="f_comment" data-t-placeholder="ph_comment"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('debtorModal')" data-t="btn_cancel">Bekor</button><button class="btn btn-primary" onclick="saveDebtor()" data-t="btn_save">Saqlash</button></div>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="overlay" id="detailModal">
+  <div class="modal modal-wide">
+    <div class="modal-header">
+      <div><div class="modal-title" id="detail-name">—</div><div style="font-size:11px;color:var(--text2);margin-top:2px;" id="detail-sub">—</div></div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn btn-ghost btn-sm" onclick="openEditFromDetail()" data-t="btn_edit">✏️ Tahrirlash</button>
+        <button class="modal-close" onclick="closeModal('detailModal')">✕</button>
+      </div>
+    </div>
+    <div class="modal-body" style="padding:0;">
+      <div style="display:flex;border-bottom:1px solid var(--border);">
+        <button class="detail-tab active" data-tab="log" onclick="switchTab('log')" data-t="tab_log">📋 Muloqot tarixi</button>
+        <button class="detail-tab" data-tab="sms" onclick="switchTab('sms')" data-t="tab_sms">💬 SMS yuborish</button>
+      </div>
+      <div id="tab-log" style="padding:18px;">
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:15px;margin-bottom:14px;">
+          <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:9px;text-transform:uppercase;" data-t="new_log_title">Yangi muloqot yozuvi</div>
+          <div class="form-group" style="margin-bottom:9px;"><label data-t="label_log_note">Muloqot natijasi *</label><textarea class="input" id="log-note" data-t-placeholder="ph_log_note" style="min-height:65px;"></textarea></div>
+          <div style="display:flex;gap:9px;align-items:flex-end;flex-wrap:wrap;">
+            <div class="form-group" style="flex:1;min-width:150px;"><label data-t="label_ptp_date">PTP sanasi</label><input class="input" id="log-ptp-date" type="date"></div>
+            <div class="form-group" style="width:110px;"><label data-t="label_ptp_time">Soat</label><input class="input" id="log-ptp-time" type="time" value="09:00"></div>
+            <button class="btn btn-primary" onclick="saveLog()" data-t="btn_save_log">💾 Saqlash</button>
+          </div>
+        </div>
+        <div style="font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;margin-bottom:7px;" data-t="log_history">Muloqot tarixi</div>
+        <div id="log-list" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;max-height:260px;overflow-y:auto;"></div>
+      </div>
+      <div id="tab-sms" style="padding:18px;display:none;">
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px;margin-bottom:14px;">
+          <div style="font-size:11px;color:var(--text2);margin-bottom:3px;" data-t="phone_label">TELEFON</div>
+          <div style="font-size:16px;font-weight:700;" id="sms-phone-display">—</div>
+        </div>
+        <div class="form-group" style="margin-bottom:12px;"><label data-t="label_template">Shablon</label><select class="input" id="sms-template-select" onchange="applySmsTemplate()"></select></div>
+        <div class="form-group" style="margin-bottom:12px;"><label data-t="label_sms_text">SMS matni</label><textarea class="input" id="sms-text" style="min-height:110px;"></textarea></div>
+        <div style="display:flex;gap:9px;flex-wrap:wrap;">
+          <button class="btn btn-green" onclick="copySmsAndOpen()" data-t="btn_copy_open">📋 Nusxalash + Google Messages</button>
+          <button class="btn btn-ghost" onclick="copyOnlySms()" data-t="btn_copy_only">📄 Faqat nusxalash</button>
+        </div>
+        <div id="sms-copied-hint" style="display:none;margin-top:10px;padding:10px 13px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);border-radius:8px;font-size:12px;color:var(--green);" data-t="sms_hint">✅ Nusxalandi! Ctrl+V bosing</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- USER MODAL -->
+<div class="overlay" id="userModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title" id="userModalTitle"></div><button class="modal-close" onclick="closeModal('userModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full"><label data-t="label_fullname">To'liq ism *</label><input class="input" id="u_name" placeholder="Ahmadov Jasur"></div>
+        <div class="form-group"><label>Login *</label><input class="input" id="u_username" placeholder="jasur01"></div>
+        <div class="form-group"><label data-t="label_password">Parol *</label><input class="input" id="u_password" type="password" placeholder="••••••••"></div>
+        <div class="form-group full"><label data-t="label_role">Rol</label>
+          <select class="input" id="u_role">
+            <option value="employee" data-t="role_employee">Xodim</option>
+            <option value="admin" data-t="role_admin">Admin</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('userModal')" data-t="btn_cancel">Bekor</button><button class="btn btn-primary" onclick="saveUser()" data-t="btn_save">Saqlash</button></div>
+  </div>
+</div>
+
+<!-- TEMPLATE MODAL -->
+<div class="overlay" id="templateModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title" id="tplTitle"></div><button class="modal-close" onclick="closeModal('templateModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:13px;"><label data-t="label_tpl_name">Shablon nomi</label><input class="input" id="tpl-name" data-t-placeholder="ph_tpl_name"></div>
+      <div class="form-group"><label data-t="label_tpl_text">Matn</label><textarea class="input" id="tpl-text" style="min-height:130px;" data-t-placeholder="ph_tpl_text"></textarea></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('templateModal')" data-t="btn_cancel">Bekor</button><button class="btn btn-primary" onclick="saveTemplate()" data-t="btn_save">Saqlash</button></div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ══════════════════════════════════════════════════
+// TRANSLATIONS
+// ══════════════════════════════════════════════════
+const LANG = {
+  uz: {
+    logo_sub:'Qarz undiruv tizimi', nav_dashboard:'Dashboard', nav_ptp:'PTP — Bugun',
+    nav_debtors:'Qarzdorlar', nav_messages:'SMS tarixi', nav_templates:'Shablonlar',
+    nav_section_admin:'ADMIN', nav_users:'Foydalanuvchilar', nav_activity:'Faoliyat tarixi',
+    btn_add_debtor:"+ Qarzdor qo'shish",
+    stat_total:'Jami qarzdorlar', stat_total_sub:'Bazada', stat_ptp:'PTP bugun',
+    stat_ptp_sub:'Qayta aloqa kerak', stat_unpaid:"To'lanmagan", stat_unpaid_sub:'Diqqat talab qiladi',
+    stat_paid:"To'langan", stat_paid_sub:'Yopilgan',
+    total_debt_title:'Umumiy qarzlar', total_debt:'Jami qarz', total_paid_lbl:"To'langan", remaining:'Qoldiq',
+    user_performance:'Xodimlar natijalari', recent_records:"So'nggi yozuvlar", all_btn:'Barchasi →',
+    all_debtors:'Barcha qarzdorlar', search_placeholder:'🔍 Qidirish...',
+    filter_all:'Barcha holatlar', filter_unpaid:"To'lanmagan", filter_partial:'Qisman', filter_paid:"To'langan",
+    filter_all_users:'Barcha xodimlar',
+    th_debtor:'Qarzdor', th_contract:'Shartnoma', th_debt:'Qarz', th_status:'Holat',
+    th_added_by:"Kim qo'shdi", th_last_contact:'Oxirgi muloqot', th_next_ptp:'PTP', th_actions:'Amallar',
+    th_user:'Foydalanuvchi', th_role:'Rol', th_debtors_added:"Qo'shilgan",
+    sms_history:'SMS tarixi', sms_templates:'SMS shablonlar', new_template:'+ Yangi shablon',
+    variables_label:"O'zgaruvchilar:",
+    all_users:'Foydalanuvchilar', add_user:"+ Qo'shish", activity_title:'Faoliyat tarixi',
+    label_fullname:'F.I.O *', ph_fullname:'Yuldoshev Umidjon Baxtiyorovich',
+    label_phone:'Telefon *', label_contract:'Shartnoma *', label_debt:"Qarz (so'm) *",
+    label_paid:"To'langan (so'm)", label_due:"To'lov sanasi", label_comment:'Izoh',
+    ph_comment:"Qo'shimcha ma'lumot...", btn_cancel:'Bekor', btn_save:'Saqlash',
+    btn_edit:'✏️ Tahrirlash', tab_log:'📋 Muloqot tarixi', tab_sms:'💬 SMS yuborish',
+    new_log_title:'Yangi muloqot yozuvi', label_log_note:'Muloqot natijasi *',
+    ph_log_note:"Mijoz bilan gaplashdim. Ertaga to'laydi dedi...",
+    label_ptp_date:'PTP sanasi', label_ptp_time:'Soat', btn_save_log:'💾 Saqlash',
+    log_history:'Muloqot tarixi', phone_label:'TELEFON', label_template:'Shablon',
+    label_sms_text:'SMS matni', btn_copy_open:'📋 Nusxalash + Google Messages',
+    btn_copy_only:'📄 Faqat nusxalash', sms_hint:'✅ Nusxalandi! Ctrl+V bosing',
+    label_tpl_name:'Shablon nomi', ph_tpl_name:'Standart eslatma',
+    label_tpl_text:'Matn', ph_tpl_text:'Hurmatli {full_name}...',
+    label_password:'Parol *', label_role:'Rol', role_employee:'Xodim', role_admin:'Admin',
+    ptp_empty:"Bugun PTP yo'q!", ptp_time_label:'PTP vaqti',
+    btn_ptp_done:'✅ PTP qildim', btn_new_ptp:'📋 Yangi PTP', btn_sms_send:'💬 SMS',
+    badge_paid:"✓ To'langan", badge_unpaid:"✕ To'lanmagan", badge_partial:'◐ Qisman',
+    badge_active:'Faol', badge_inactive:'Bloklangan',
+    details_btn:'📋 Batafsil', modal_add:"Qarzdor qo'shish", modal_edit:'Tahrirlash',
+    modal_new_tpl:'Yangi shablon', modal_edit_tpl:'Shablonni tahrirlash',
+    modal_add_user:"Yangi foydalanuvchi", modal_edit_user:'Tahrirlash',
+    role_label_admin:'👑 Admin', role_label_employee:'👤 Xodim',
+    toast_added:"Qo'shildi ✅", toast_updated:'Yangilandi ✅', toast_deleted:"O'chirildi",
+    toast_log_saved:'Yozuv saqlandi ✅', toast_ptp_done:'✅ PTP bajarildi!',
+    toast_copied:'📋 Nusxalandi! Ctrl+V bosing', toast_copy_only:'📋 Matn nusxalandi!',
+    toast_fill_required:"Majburiy maydonlarni to'ldiring!",
+    toast_fill_all:"Barcha maydonlarni to'ldiring!", toast_fill_note:'Muloqot natijasini yozing!',
+    toast_empty_text:"Matn bo'sh!", toast_duplicate:'Bu shartnoma raqami allaqachon mavjud',
+    toast_error:'Xatolik!', toast_no_perm:"Ruxsat yo'q",
+    confirm_delete:"O'chirishni tasdiqlaysizmi?", confirm_delete_tpl:"O'chirilsinmi?",
+    no_records:"Hali yozuv yo'q", no_logs:"Hali muloqot yo'q",
+    no_history:"Tarix bo'sh", no_templates:"Shablon yo'q", no_users:"Foydalanuvchi yo'q",
+    stat_debtors:'ta qarzdor', stat_contacts:'ta muloqot', stat_sms:'ta SMS',
+    page_titles:{ dashboard:'Dashboard', ptp:'PTP — Bugun', debtors:'Qarzdorlar',
+      messages:'SMS tarixi', templates:'Shablonlar', users:'Foydalanuvchilar', activity:'Faoliyat tarixi' },
+    activity_actions:{ login:'Kirdi', logout:'Chiqdi', add_debtor:"Qarzdor qo'shdi",
+      edit_debtor:'Qarzdorni tahrirladi', delete_debtor:"Qarzdorni o'chirdi",
+      add_log:'Muloqot yozdi', ptp_done:'PTP bajarildi', add_user:"Foydalanuvchi qo'shdi" }
+  },
+  ru: {
+    logo_sub:'Система взыскания', nav_dashboard:'Дашборд', nav_ptp:'PTP — Сегодня',
+    nav_debtors:'Должники', nav_messages:'История SMS', nav_templates:'Шаблоны',
+    nav_section_admin:'ADMIN', nav_users:'Пользователи', nav_activity:'Журнал активности',
+    btn_add_debtor:'+ Добавить должника',
+    stat_total:'Всего должников', stat_total_sub:'В базе', stat_ptp:'PTP сегодня',
+    stat_ptp_sub:'Требуют звонка', stat_unpaid:'Не оплачено', stat_unpaid_sub:'Требуют внимания',
+    stat_paid:'Оплачено', stat_paid_sub:'Закрытые',
+    total_debt_title:'Общая задолженность', total_debt:'Всего долгов', total_paid_lbl:'Оплачено', remaining:'Остаток',
+    user_performance:'Результаты сотрудников', recent_records:'Последние записи', all_btn:'Все →',
+    all_debtors:'Все должники', search_placeholder:'🔍 Поиск...',
+    filter_all:'Все статусы', filter_unpaid:'Не оплачено', filter_partial:'Частично', filter_paid:'Оплачено',
+    filter_all_users:'Все сотрудники',
+    th_debtor:'Должник', th_contract:'Договор', th_debt:'Задолженность', th_status:'Статус',
+    th_added_by:'Кто добавил', th_last_contact:'Последний контакт', th_next_ptp:'PTP', th_actions:'Действия',
+    th_user:'Пользователь', th_role:'Роль', th_debtors_added:'Добавлено',
+    sms_history:'История SMS', sms_templates:'Шаблоны SMS', new_template:'+ Новый шаблон',
+    variables_label:'Переменные:',
+    all_users:'Пользователи', add_user:'+ Добавить', activity_title:'Журнал активности',
+    label_fullname:'Ф.И.О *', ph_fullname:'Юлдошев Умиджон Бахтиёрович',
+    label_phone:'Телефон *', label_contract:'Договор *', label_debt:'Сумма долга (сум) *',
+    label_paid:'Оплачено (сум)', label_due:'Дата платежа', label_comment:'Комментарий',
+    ph_comment:'Дополнительная информация...', btn_cancel:'Отмена', btn_save:'Сохранить',
+    btn_edit:'✏️ Редактировать', tab_log:'📋 История контактов', tab_sms:'💬 Отправить SMS',
+    new_log_title:'Новая запись контакта', label_log_note:'Результат контакта *',
+    ph_log_note:'Поговорил с клиентом. Обещал оплатить завтра...',
+    label_ptp_date:'Дата PTP', label_ptp_time:'Время', btn_save_log:'💾 Сохранить',
+    log_history:'История контактов', phone_label:'ТЕЛЕФОН', label_template:'Шаблон',
+    label_sms_text:'Текст SMS', btn_copy_open:'📋 Скопировать + Google Messages',
+    btn_copy_only:'📄 Только скопировать', sms_hint:'✅ Скопировано! Нажмите Ctrl+V',
+    label_tpl_name:'Название шаблона', ph_tpl_name:'Стандартное уведомление',
+    label_tpl_text:'Текст', ph_tpl_text:'Уважаемый(ая) {full_name}...',
+    label_password:'Пароль *', label_role:'Роль', role_employee:'Сотрудник', role_admin:'Администратор',
+    ptp_empty:'Сегодня PTP нет!', ptp_time_label:'Время PTP',
+    btn_ptp_done:'✅ PTP выполнен', btn_new_ptp:'📋 Новый PTP', btn_sms_send:'💬 SMS',
+    badge_paid:'✓ Оплачено', badge_unpaid:'✕ Не оплачено', badge_partial:'◐ Частично',
+    badge_active:'Активен', badge_inactive:'Заблокирован',
+    details_btn:'📋 Подробнее', modal_add:'Добавить должника', modal_edit:'Редактировать',
+    modal_new_tpl:'Новый шаблон', modal_edit_tpl:'Редактировать шаблон',
+    modal_add_user:'Новый пользователь', modal_edit_user:'Редактировать',
+    role_label_admin:'👑 Администратор', role_label_employee:'👤 Сотрудник',
+    toast_added:'Добавлено ✅', toast_updated:'Обновлено ✅', toast_deleted:'Удалено',
+    toast_log_saved:'Запись сохранена ✅', toast_ptp_done:'✅ PTP выполнен!',
+    toast_copied:'📋 Скопировано! Нажмите Ctrl+V', toast_copy_only:'📋 Текст скопирован!',
+    toast_fill_required:'Заполните обязательные поля!',
+    toast_fill_all:'Заполните все поля!', toast_fill_note:'Напишите результат контакта!',
+    toast_empty_text:'Текст пустой!', toast_duplicate:'Договор с таким номером уже существует',
+    toast_error:'Ошибка!', toast_no_perm:'Нет доступа',
+    confirm_delete:'Удалить запись?', confirm_delete_tpl:'Удалить шаблон?',
+    no_records:'Нет записей', no_logs:'Контактов нет',
+    no_history:'История пуста', no_templates:'Шаблонов нет', no_users:'Пользователей нет',
+    stat_debtors:' должников', stat_contacts:' контактов', stat_sms:' SMS',
+    page_titles:{ dashboard:'Дашборд', ptp:'PTP — Сегодня', debtors:'Должники',
+      messages:'История SMS', templates:'Шаблоны', users:'Пользователи', activity:'Журнал активности' },
+    activity_actions:{ login:'Вошёл', logout:'Вышел', add_debtor:'Добавил должника',
+      edit_debtor:'Изменил должника', delete_debtor:'Удалил должника',
+      add_log:'Записал контакт', ptp_done:'PTP выполнен', add_user:'Добавил пользователя' }
+  }
+};
+
+let currentLang = localStorage.getItem('lang')||'uz';
+let currentUser = null;
+let debtors=[], templates=[], users=[], editingId=null, editingTplId=null, editingUserId=null, currentDebtor=null;
+
+function t(key) { return LANG[currentLang][key] || LANG['uz'][key] || key; }
+
+function setLang(l) {
+  currentLang=l; localStorage.setItem('lang',l);
+  document.getElementById('btn-uz').classList.toggle('active',l==='uz');
+  document.getElementById('btn-ru').classList.toggle('active',l==='ru');
+  applyTranslations();
+  const active = document.querySelector('.nav-item.active')?.dataset.page;
+  if (active) { document.getElementById('topbarTitle').textContent = t('page_titles')[active]||''; }
+  // re-render dynamic content
+  if (active==='dashboard') loadDashboard();
+  if (active==='ptp') loadPtpPage();
+  if (active==='debtors') loadDebtors();
+  if (active==='messages') loadMessages();
+  if (active==='templates') loadTemplates();
+  if (active==='users') loadUsers();
+  if (active==='activity') loadActivity();
+}
+
+function applyTranslations() {
+  document.querySelectorAll('[data-t]').forEach(el => {
+    const v = t(el.dataset.t); if (typeof v==='string') el.innerHTML=v;
+  });
+  document.querySelectorAll('[data-t-placeholder]').forEach(el => {
+    el.placeholder = t(el.dataset.tPlaceholder);
+  });
+}
+
+// ══════════════════════════════════════════════════
+// API & AUTH
+// ══════════════════════════════════════════════════
+async function api(url, method='GET', body) {
+  const opts = {method, headers:{'Content-Type':'application/json'}};
+  if (body) opts.body=JSON.stringify(body);
+  const r = await fetch(url, opts);
+  if (r.status===401) { window.location.href='/'; return null; }
+  return r.json();
+}
+
+async function doLogout() {
+  await fetch('/logout',{method:'POST'});
+  window.location.href='/';
+}
+
+function setupUser(u) {
+  currentUser = u;
+  document.getElementById('sidebar-name').textContent = u.full_name;
+  document.getElementById('sidebar-role').textContent = u.role==='admin' ? t('role_label_admin') : t('role_label_employee');
+  document.getElementById('sidebar-avatar').textContent = u.full_name[0].toUpperCase();
+  // Show/hide admin sections
+  document.querySelectorAll('.admin-only').forEach(el => {
+    el.style.display = u.role==='admin' ? '' : 'none';
+  });
+}
+
+// ══════════════════════════════════════════════════
+// NAV
+// ══════════════════════════════════════════════════
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => { if(item.dataset.page) showPage(item.dataset.page); });
+});
+
+function showPage(name) {
+  if (['users','activity'].includes(name) && currentUser?.role!=='admin') return;
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelector(`[data-page="${name}"]`)?.classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(`page-${name}`)?.classList.add('active');
+  document.getElementById('topbarTitle').textContent = t('page_titles')[name]||'';
+  if (name==='dashboard') loadDashboard();
+  if (name==='ptp') loadPtpPage();
+  if (name==='debtors') loadDebtors();
+  if (name==='messages') loadMessages();
+  if (name==='templates') loadTemplates();
+  if (name==='users') loadUsers();
+  if (name==='activity') loadActivity();
+}
+
+// ══════════════════════════════════════════════════
+// FORMAT
+// ══════════════════════════════════════════════════
+function fmt(n) { return Number(n).toLocaleString('ru-RU')+(currentLang==='uz'?" so'm":' сум'); }
+function fmtDate(d) { if(!d) return '—'; try{return new Date(d).toLocaleDateString('ru-RU');}catch{return d;} }
+function fmtDT(d) { if(!d) return '—'; try{const dt=new Date(d);return dt.toLocaleDateString('ru-RU')+' '+dt.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});}catch{return d;} }
+function fmtTime(d) { if(!d) return '—'; try{return new Date(d).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});}catch{return d;} }
+
+function fillTemplate(text, d) {
+  return text.replace(/{full_name}/g,d.full_name||'').replace(/{contract_number}/g,d.contract_number||'')
+    .replace(/{debt_amount}/g,Number(d.debt_amount).toLocaleString('ru-RU'))
+    .replace(/{paid_amount}/g,Number(d.paid_amount).toLocaleString('ru-RU'))
+    .replace(/{due_date}/g,fmtDate(d.due_date)).replace(/{phone}/g,d.phone||'');
+}
+function statusBadge(s) {
+  if(s==='paid') return `<span class="badge badge-paid">${t('badge_paid')}</span>`;
+  if(s==='partial') return `<span class="badge badge-partial">${t('badge_partial')}</span>`;
+  return `<span class="badge badge-unpaid">${t('badge_unpaid')}</span>`;
+}
+function ptpCell(next_ptp) {
+  if(!next_ptp) return '<span style="color:var(--text3);font-size:11px;">—</span>';
+  const past=new Date(next_ptp)<=new Date();
+  return `<span style="font-size:11px;font-weight:600;color:${past?'var(--accent)':'var(--orange)'};">${past?'⚠️':'⏰'} ${fmtDT(next_ptp)}</span>`;
+}
+
+function debtorRow(d, mode='full') {
+  const pct=d.debt_amount>0?Math.min(100,(d.paid_amount/d.debt_amount)*100):0;
+  const addedBy = d.created_by_name ? `<span style="font-size:11px;color:var(--text2);">👤 ${d.created_by_name}</span>` : '—';
+  if (mode==='dash') return `<tr>
+    <td><div class="debtor-name">${d.full_name}</div><div class="debtor-phone">${d.phone}</div></td>
+    <td><span class="contract">${d.contract_number}</span></td>
+    <td><div class="amount">${fmt(d.debt_amount)}</div><div class="progress-bar"><div class="progress-fill ${pct>=100?'full':''}" style="width:${pct}%"></div></div></td>
+    <td>${statusBadge(d.status)}</td>
+    <td>${addedBy}</td>
+    <td>${ptpCell(d.next_ptp)}</td>
+    <td><button class="btn btn-ghost btn-xs" onclick="openDetail(${d.id})">${t('details_btn')}</button></td>
+  </tr>`;
+  return `<tr>
+    <td><div class="debtor-name">${d.full_name}</div><div class="debtor-phone">${d.phone}</div></td>
+    <td><span class="contract">${d.contract_number}</span></td>
+    <td><div class="amount">${fmt(d.debt_amount)}</div>${d.paid_amount>0?`<div class="amount-paid">↑ ${fmt(d.paid_amount)}</div>`:''}<div class="progress-bar"><div class="progress-fill ${pct>=100?'full':''}" style="width:${pct}%"></div></div></td>
+    <td>${statusBadge(d.status)}</td>
+    <td>${addedBy}<br><span style="font-size:10px;color:var(--text3);">${fmtDT(d.created_at)}</span></td>
+    <td><div class="last-note" title="${d.last_note||''}">${d.last_note||'<span style="color:var(--text3)">—</span>'}</div>${d.last_contact_by?`<div style="font-size:10px;color:var(--text3);">👤 ${d.last_contact_by}</div>`:''}</td>
+    <td>${ptpCell(d.next_ptp)}</td>
+    <td><div class="actions">
+      <button class="btn btn-ghost btn-xs" onclick="openDetail(${d.id})">📋</button>
+      <button class="btn btn-ghost btn-xs" onclick="openEditModal(${d.id})">✏️</button>
+      <button class="btn btn-danger btn-xs" onclick="deleteDebtor(${d.id})">🗑</button>
+    </div></td>
+  </tr>`;
+}
+
+// ══════════════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════════════
+async function loadDashboard() {
+  const [stats, data] = await Promise.all([api('/api/stats'), api('/api/debtors')]);
+  if (!stats||!data) return;
+  debtors=data;
+  document.getElementById('s-total').textContent=stats.total;
+  document.getElementById('s-ptp').textContent=stats.ptp_due;
+  document.getElementById('s-unpaid').textContent=stats.unpaid;
+  document.getElementById('s-paid').textContent=stats.paid;
+  document.getElementById('s-total-debt').textContent=fmt(stats.total_debt);
+  document.getElementById('s-total-paid').textContent=fmt(stats.total_paid);
+  document.getElementById('s-remaining').textContent=fmt(stats.total_debt-stats.total_paid);
+  const badge=document.getElementById('ptp-badge');
+  badge.style.display=stats.ptp_due>0?'block':'none';
+  badge.textContent=stats.ptp_due;
+  // User stats
+  if (currentUser?.role==='admin' && stats.user_stats?.length) {
+    document.getElementById('user-stats-list').innerHTML = stats.user_stats.map(u=>`
+      <div class="user-stat-row">
+        <div class="user-stat-avatar">${u.full_name[0]}</div>
+        <div class="user-stat-info"><div class="user-stat-name">${u.full_name}</div><div class="user-stat-username">@${u.username}</div></div>
+        <div class="user-stat-numbers">
+          <div class="user-stat-num"><div class="user-stat-num-val" style="color:var(--accent)">${u.debtors_added}</div><div class="user-stat-num-lbl">${t('stat_debtors')}</div></div>
+          <div class="user-stat-num"><div class="user-stat-num-val" style="color:var(--blue)">${u.contacts_made}</div><div class="user-stat-num-lbl">${t('stat_contacts')}</div></div>
+          <div class="user-stat-num"><div class="user-stat-num-val" style="color:var(--green)">${u.sms_sent}</div><div class="user-stat-num-lbl">${t('stat_sms')}</div></div>
+        </div>
+      </div>
+    `).join('');
+  }
+  document.getElementById('dash-tbody').innerHTML = data.slice(0,8).map(d=>debtorRow(d,'dash')).join('') ||
+    `<tr><td colspan="7"><div class="empty"><div class="empty-icon">📭</div><div class="empty-text">${t('no_records')}</div></div></td></tr>`;
+}
+
+// ══════════════════════════════════════════════════
+// PTP
+// ══════════════════════════════════════════════════
+async function loadPtpPage() {
+  const data = await api('/api/debtors?ptp_today=1');
+  if (!data) return;
+  const empty=document.getElementById('ptp-empty'), list=document.getElementById('ptp-list');
+  if (!data.length) { empty.style.display='block'; list.innerHTML=''; return; }
+  empty.style.display='none';
+  list.innerHTML = data.map(d=>`
+    <div class="section">
+      <div style="padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+        <div>
+          <div style="font-weight:700;font-size:14px;">${d.full_name}</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px;">${d.phone} · ${d.contract_number} · ${fmt(d.debt_amount)}</div>
+          <div style="margin-top:5px;">${statusBadge(d.status)}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:10px;color:var(--text2);">${t('ptp_time_label')}</div>
+          <div style="color:var(--orange);font-weight:700;font-size:13px;">⏰ ${fmtDT(d.ptp_datetime)}</div>
+        </div>
+      </div>
+      ${d.note?`<div style="padding:0 18px 10px;font-size:13px;color:var(--text2);">💬 ${d.note}</div>`:''}
+      <div style="padding:10px 18px;border-top:1px solid var(--border);display:flex;gap:7px;flex-wrap:wrap;">
+        <button class="btn btn-green btn-sm" onclick="markPtpDone(${d.log_id})">${t('btn_ptp_done')}</button>
+        <button class="btn btn-orange btn-sm" onclick="openDetail(${d.id})">${t('btn_new_ptp')}</button>
+        <button class="btn btn-ghost btn-sm" onclick="openDetailSms(${d.id})">${t('btn_sms_send')}</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function markPtpDone(logId) {
+  await api(`/api/logs/${logId}/ptp_done`,'PATCH');
+  toast(t('toast_ptp_done'),'success'); loadPtpPage(); loadDashboard();
+}
+
+// ══════════════════════════════════════════════════
+// DEBTORS
+// ══════════════════════════════════════════════════
+async function loadDebtors() {
+  const search=document.getElementById('searchInput')?.value||'';
+  const status=document.getElementById('statusFilter')?.value||'';
+  const userId=document.getElementById('userFilter')?.value||'';
+  const params=new URLSearchParams();
+  if(search) params.set('search',search);
+  if(status) params.set('status',status);
+  if(userId) params.set('user_id',userId);
+  const data=await api('/api/debtors?'+params);
+  if(!data) return;
+  debtors=data;
+  document.getElementById('debtors-tbody').innerHTML=data.length
+    ?data.map(d=>debtorRow(d,'full')).join('')
+    :`<tr><td colspan="8"><div class="empty"><div class="empty-icon">📭</div><div class="empty-text">${t('no_records')}</div></div></td></tr>`;
+}
+
+function openAddModal() {
+  editingId=null;
+  document.getElementById('modalTitle').textContent=t('modal_add');
+  ['f_name','f_phone','f_contract','f_comment'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f_debt').value='';
+  document.getElementById('f_paid').value='0';
+  document.getElementById('f_due').value='';
+  document.getElementById('debtorModal').classList.add('active');
+}
+function openEditModal(id) {
+  const d=debtors.find(x=>x.id===id); if(!d) return;
+  editingId=id;
+  document.getElementById('modalTitle').textContent=t('modal_edit');
+  document.getElementById('f_name').value=d.full_name;
+  document.getElementById('f_phone').value=d.phone;
+  document.getElementById('f_contract').value=d.contract_number;
+  document.getElementById('f_debt').value=d.debt_amount;
+  document.getElementById('f_paid').value=d.paid_amount;
+  document.getElementById('f_due').value=d.due_date||'';
+  document.getElementById('f_comment').value=d.comment||'';
+  document.getElementById('debtorModal').classList.add('active');
+}
+function openEditFromDetail() { if(!currentDebtor) return; closeModal('detailModal'); openEditModal(currentDebtor.id); }
+
+async function saveDebtor() {
+  const data={full_name:document.getElementById('f_name').value.trim(),phone:document.getElementById('f_phone').value.trim(),
+    contract_number:document.getElementById('f_contract').value.trim(),debt_amount:document.getElementById('f_debt').value,
+    paid_amount:document.getElementById('f_paid').value||0,due_date:document.getElementById('f_due').value,
+    comment:document.getElementById('f_comment').value.trim()};
+  if(!data.full_name||!data.phone||!data.contract_number||!data.debt_amount){toast(t('toast_fill_required'),'error');return;}
+  const result=editingId?await api(`/api/debtors/${editingId}`,'PUT',data):await api('/api/debtors','POST',data);
+  if(!result) return;
+  if(result.success){
+    toast(editingId?t('toast_updated'):t('toast_added'),'success');
+    closeModal('debtorModal'); loadDashboard();
+    if(document.getElementById('page-debtors').classList.contains('active')) loadDebtors();
+  } else {toast(result.error||t('toast_error'),'error');}
+}
+
+async function deleteDebtor(id) {
+  if(!confirm(t('confirm_delete'))) return;
+  const r=await api(`/api/debtors/${id}`,'DELETE'); if(!r) return;
+  if(r.success){toast(t('toast_deleted'),'success');loadDebtors();loadDashboard();}
+  else toast(r.error||t('toast_no_perm'),'error');
+}
+
+// ══════════════════════════════════════════════════
+// DETAIL
+// ══════════════════════════════════════════════════
+async function openDetail(id) {
+  let d=debtors.find(x=>x.id===id);
+  if(!d){const all=await api('/api/debtors');debtors=all;d=all.find(x=>x.id===id);}
+  currentDebtor=d;
+  document.getElementById('detail-name').textContent=d.full_name;
+  document.getElementById('detail-sub').innerHTML=`${d.phone} · ${d.contract_number} · ${fmt(d.debt_amount)} · ${statusBadge(d.status)}`;
+  document.getElementById('sms-phone-display').textContent=d.phone;
+  document.getElementById('log-note').value='';
+  document.getElementById('log-ptp-date').value='';
+  document.getElementById('log-ptp-time').value='09:00';
+  document.getElementById('sms-copied-hint').style.display='none';
+  switchTab('log'); await loadLogs(id); await loadSmsTemplates();
+  document.getElementById('detailModal').classList.add('active');
+}
+async function openDetailSms(id){await openDetail(id);switchTab('sms');}
+function switchTab(name){
+  document.querySelectorAll('.detail-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
+  document.getElementById('tab-log').style.display=name==='log'?'block':'none';
+  document.getElementById('tab-sms').style.display=name==='sms'?'block':'none';
+}
+
+// ══════════════════════════════════════════════════
+// LOGS
+// ══════════════════════════════════════════════════
+async function loadLogs(id) {
+  const logs=await api(`/api/debtors/${id}/logs`); if(!logs) return;
+  const c=document.getElementById('log-list');
+  if(!logs.length){c.innerHTML=`<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">${t('no_logs')}</div></div>`;return;}
+  c.innerHTML=logs.map(l=>`
+    <div class="log-item">
+      <div class="log-header">
+        <span style="font-size:12px;font-weight:600;">${fmtDT(l.created_at)}</span>
+        <span style="font-size:11px;color:var(--text3);">👤 ${l.user_name||'—'}</span>
+      </div>
+      <div class="log-note">${l.note}</div>
+      ${l.ptp_datetime?`<div class="log-ptp ${l.ptp_done?'done':''}">
+        ${l.ptp_done?'✅':'⏰'} PTP: ${fmtDT(l.ptp_datetime)}
+        ${!l.ptp_done?`<button class="btn btn-green btn-xs" style="margin-left:6px;" onclick="markPtpDone(${l.id})">${t('btn_ptp_done')}</button>`:''}
+      </div>`:''}
+    </div>
+  `).join('');
+}
+
+async function saveLog() {
+  const note=document.getElementById('log-note').value.trim();
+  if(!note){toast(t('toast_fill_note'),'error');return;}
+  const ptpDate=document.getElementById('log-ptp-date').value;
+  const ptpTime=document.getElementById('log-ptp-time').value;
+  await api(`/api/debtors/${currentDebtor.id}/logs`,'POST',{note,ptp_datetime:ptpDate?`${ptpDate} ${ptpTime}`:null});
+  document.getElementById('log-note').value='';
+  document.getElementById('log-ptp-date').value='';
+  toast(t('toast_log_saved'),'success');
+  await loadLogs(currentDebtor.id); loadDashboard();
+}
+
+// ══════════════════════════════════════════════════
+// SMS
+// ══════════════════════════════════════════════════
+async function loadSmsTemplates() {
+  templates=await api('/api/templates'); if(!templates) return;
+  const sel=document.getElementById('sms-template-select');
+  sel.innerHTML=templates.map(tp=>`<option value="${tp.id}">${tp.name}</option>`).join('');
+  applySmsTemplate();
+}
+function applySmsTemplate() {
+  const tid=parseInt(document.getElementById('sms-template-select').value);
+  const tpl=templates.find(tp=>tp.id===tid);
+  if(tpl&&currentDebtor) document.getElementById('sms-text').value=fillTemplate(tpl.text,currentDebtor);
+}
+async function copySmsAndOpen() {
+  const text=document.getElementById('sms-text').value.trim();
+  if(!text){toast(t('toast_empty_text'),'error');return;}
+  await navigator.clipboard.writeText(text);
+  window.open('https://messages.google.com/web/conversations/new','_blank');
+  document.getElementById('sms-copied-hint').style.display='block';
+  await api('/api/messages/log','POST',{debtor_id:currentDebtor.id,phone:currentDebtor.phone,message_text:text});
+  toast(t('toast_copied'),'success');
+}
+async function copyOnlySms() {
+  const text=document.getElementById('sms-text').value.trim();
+  if(!text){toast(t('toast_empty_text'),'error');return;}
+  await navigator.clipboard.writeText(text); toast(t('toast_copy_only'),'success');
+}
+
+// ══════════════════════════════════════════════════
+// MESSAGES
+// ══════════════════════════════════════════════════
+async function loadMessages() {
+  const msgs=await api('/api/messages'); if(!msgs) return;
+  document.getElementById('messages-list').innerHTML=msgs.length?msgs.map(m=>`
+    <div style="padding:11px 16px;border-bottom:1px solid var(--border);">
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+        <span style="font-weight:600;font-size:13px;">${m.full_name}</span>
+        <span style="font-size:11px;color:var(--text3);">${fmtDT(m.sent_at)}</span>
+      </div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:3px;">📱 ${m.phone} · 👤 ${m.sent_by||'—'}</div>
+      <div style="font-size:13px;color:var(--text2);">${m.message_text}</div>
+    </div>
+  `).join(''):`<div class="empty"><div class="empty-icon">💬</div><div class="empty-text">${t('no_history')}</div></div>`;
+}
+
+// ══════════════════════════════════════════════════
+// TEMPLATES
+// ══════════════════════════════════════════════════
+async function loadTemplates() {
+  templates=await api('/api/templates'); if(!templates) return;
+  document.getElementById('templates-list').innerHTML=templates.length?templates.map(tp=>`
+    <div class="tpl-item">
+      <div class="tpl-body"><div class="tpl-name">${tp.name}</div><div class="tpl-text">${tp.text}</div></div>
+      <div class="actions" style="flex-shrink:0;">
+        <button class="btn btn-ghost btn-sm" onclick="openTemplateModal(${tp.id})">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteTemplate(${tp.id})">🗑</button>
+      </div>
+    </div>
+  `).join(''):`<div class="empty"><div class="empty-icon">📝</div><div class="empty-text">${t('no_templates')}</div></div>`;
+}
+function openTemplateModal(id) {
+  editingTplId=id||null;
+  const tpl=id?templates.find(tp=>tp.id===id):null;
+  document.getElementById('tplTitle').textContent=id?t('modal_edit_tpl'):t('modal_new_tpl');
+  document.getElementById('tpl-name').value=tpl?.name||'';
+  document.getElementById('tpl-text').value=tpl?.text||'';
+  document.getElementById('templateModal').classList.add('active');
+}
+async function saveTemplate() {
+  const data={name:document.getElementById('tpl-name').value.trim(),text:document.getElementById('tpl-text').value.trim()};
+  if(!data.name||!data.text){toast(t('toast_fill_all'),'error');return;}
+  if(editingTplId) await api(`/api/templates/${editingTplId}`,'PUT',data);
+  else await api('/api/templates','POST',data);
+  toast(t('toast_saved')||t('toast_updated'),'success');
+  closeModal('templateModal'); loadTemplates();
+}
+async function deleteTemplate(id) {
+  if(!confirm(t('confirm_delete_tpl'))) return;
+  await api(`/api/templates/${id}`,'DELETE');
+  toast(t('toast_deleted'),'success'); loadTemplates();
+}
+
+// ══════════════════════════════════════════════════
+// USERS (admin)
+// ══════════════════════════════════════════════════
+async function loadUsers() {
+  users=await api('/api/users'); if(!users) return;
+  // Also populate user filter
+  const sel=document.getElementById('userFilter');
+  sel.innerHTML=`<option value="">${t('filter_all_users')}</option>`+
+    users.map(u=>`<option value="${u.id}">${u.full_name}</option>`).join('');
+
+  document.getElementById('users-tbody').innerHTML=users.length?users.map(u=>`
+    <tr>
+      <td><div style="font-weight:600;">${u.full_name}</div></td>
+      <td><span class="contract">@${u.username}</span></td>
+      <td>${u.role==='admin'?`<span class="badge badge-admin">${t('role_label_admin')}</span>`:`<span class="badge badge-employee">${t('role_label_employee')}</span>`}</td>
+      <td style="font-family:var(--font-head);font-weight:700;">${u.debtor_count}</td>
+      <td>${u.is_active?`<span class="badge badge-paid">${t('badge_active')}</span>`:`<span class="badge badge-unpaid">${t('badge_inactive')}</span>`}</td>
+      <td><div class="actions">
+        <button class="btn btn-ghost btn-xs" onclick="openUserModal(${u.id})">✏️</button>
+        ${u.id!==currentUser?.id?`<button class="btn btn-danger btn-xs" onclick="deleteUser(${u.id})">🗑</button>`:''}
+      </div></td>
+    </tr>
+  `).join(''):`<tr><td colspan="6"><div class="empty"><div class="empty-icon">👤</div><div class="empty-text">${t('no_users')}</div></div></td></tr>`;
+}
+
+function openUserModal(id) {
+  editingUserId=id||null;
+  const u=id?users.find(x=>x.id===id):null;
+  document.getElementById('userModalTitle').textContent=id?t('modal_edit_user'):t('modal_add_user');
+  document.getElementById('u_name').value=u?.full_name||'';
+  document.getElementById('u_username').value=u?.username||'';
+  document.getElementById('u_password').value='';
+  document.getElementById('u_role').value=u?.role||'employee';
+  document.getElementById('userModal').classList.add('active');
+}
+async function saveUser() {
+  const data={full_name:document.getElementById('u_name').value.trim(),username:document.getElementById('u_username').value.trim(),
+    password:document.getElementById('u_password').value,role:document.getElementById('u_role').value,is_active:1};
+  if(!data.full_name||!data.username){toast(t('toast_fill_required'),'error');return;}
+  if(!editingUserId&&!data.password){toast(t('toast_fill_required'),'error');return;}
+  const result=editingUserId?await api(`/api/users/${editingUserId}`,'PUT',data):await api('/api/users','POST',data);
+  if(!result) return;
+  if(result.success){toast(t('toast_saved')||t('toast_added'),'success');closeModal('userModal');loadUsers();}
+  else toast(result.error||t('toast_error'),'error');
+}
+async function deleteUser(id) {
+  if(!confirm(t('confirm_delete'))) return;
+  await api(`/api/users/${id}`,'DELETE');
+  toast(t('toast_deleted'),'success'); loadUsers();
+}
+
+// ══════════════════════════════════════════════════
+// ACTIVITY
+// ══════════════════════════════════════════════════
+async function loadActivity() {
+  const logs=await api('/api/activity'); if(!logs) return;
+  const actionIcons={login:'🟢',logout:'🔴',add_debtor:'➕',edit_debtor:'✏️',delete_debtor:'🗑️',add_log:'💬',ptp_done:'✅',add_user:'👤'};
+  document.getElementById('activity-list').innerHTML=logs.length?logs.map(l=>`
+    <div class="activity-item">
+      <div class="activity-icon">${actionIcons[l.action]||'📋'}</div>
+      <div class="activity-body">
+        <div class="activity-who">👤 ${l.full_name} <span style="color:var(--text3);font-weight:400;">(@${l.username})</span></div>
+        <div class="activity-what">${t('activity_actions')[l.action]||l.action}${l.details?' — '+l.details:''}</div>
+      </div>
+      <div class="activity-time">${fmtDT(l.created_at)}</div>
+    </div>
+  `).join(''):`<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">${t('no_history')}</div></div>`;
+}
+
+// ══════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════
+function closeModal(id){document.getElementById(id).classList.remove('active');}
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('active');}));
+function toast(msg,type='success'){
+  const d=document.createElement('div');d.className=`toast ${type}`;
+  d.innerHTML=`<span>${type==='success'?'✅':'❌'}</span> ${msg}`;
+  document.getElementById('toastContainer').appendChild(d);
+  setTimeout(()=>d.remove(),3500);
+}
+setInterval(async()=>{
+  const stats=await api('/api/stats'); if(!stats) return;
+  const badge=document.getElementById('ptp-badge');
+  badge.style.display=stats.ptp_due>0?'block':'none';
+  badge.textContent=stats.ptp_due;
+},60000);
+
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
+async function init() {
+  const u=await api('/api/me');
+  if(!u||u.error){window.location.href='/';return;}
+  setupUser(u);
+  setLang(currentLang);
+  loadDashboard();
+}
+init();
+</script>
+</body>
+</html>
